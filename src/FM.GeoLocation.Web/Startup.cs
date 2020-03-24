@@ -29,6 +29,8 @@ namespace FM.GeoLocation.Web
             // Geo Location
             services.AddSingleton<IGeoLocationClientConfiguration, GeoLocationClientConfiguration>();
             services.AddSingleton<IGeoLocationClient, GeoLocationClient>();
+
+            services.AddHttpContextAccessor();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
