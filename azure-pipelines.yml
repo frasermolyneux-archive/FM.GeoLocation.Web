@@ -26,6 +26,13 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
+- task: CopyFiles@2
+  displayName: "Copy terraform to artifact staging directory"
+  inputs: 
+    SourceFolder: '$(Build.SourcesDirectory)/terraform'
+    Contents: '**'
+    TargetFolder: '$(Build.artifactStagingDirectory)/terraform'
+
 - task: PublishBuildArtifacts@1
   inputs:
     PathToPublish: '$(build.artifactStagingDirectory)'
