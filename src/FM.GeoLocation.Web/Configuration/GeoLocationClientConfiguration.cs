@@ -14,11 +14,9 @@ namespace FM.GeoLocation.Web.Configuration
             _configuration = configuration;
         }
 
-        public string BaseUrl => _configuration.GetSection("GeoLocationService")["BaseUrl"] ??
-                                 Environment.GetEnvironmentVariable("GeoLocationService.BaseUrl");
+        public string BaseUrl => _configuration.GetSection("GeoLocationService")["BaseUrl"];
 
-        public string ApiKey => _configuration.GetSection("GeoLocationService")["ApiKey"] ??
-                                Environment.GetEnvironmentVariable("GeoLocationService.ApiKey");
+        public string ApiKey => _configuration.GetSection("GeoLocationService")["ApiKey"];
 
         public bool UseMemoryCache { get; } = true;
         public int CacheEntryLifeInMinutes { get; } = 60;

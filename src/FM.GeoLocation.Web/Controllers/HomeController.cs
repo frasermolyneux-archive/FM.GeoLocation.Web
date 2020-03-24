@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using FM.GeoLocation.Client;
 using FM.GeoLocation.Web.Models;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -10,17 +11,20 @@ namespace FM.GeoLocation.Web.Controllers
     public class HomeController : Controller
     {
         private readonly IGeoLocationClient _geoLocationClient;
+        private readonly IHttpConnectionFeature _httpConnection;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, IGeoLocationClient geoLocationClient)
+        public HomeController(ILogger<HomeController> logger, IGeoLocationClient geoLocationClient,
+            IHttpConnectionFeature httpConnection)
         {
             _logger = logger;
             _geoLocationClient = geoLocationClient;
+            _httpConnection = httpConnection;
         }
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.GeoData = await _geoLocationClient.LookupAddress("168.2.3.45");
+            ViewBag.GeoData = await _geoLocationClient.LookupAddress(_httpConnection.RemoteIpAddress.ToString());
 
             return View();
         }
