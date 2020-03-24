@@ -1,12 +1,35 @@
-﻿@{
+﻿@model FM.GeoLocation.Contract.Models.GeoLocationDto
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    
-    <p>
-        @ViewBag.GeoData.Country
-    </p>
+    <h1 class="display-4">Welcome - @Model.Address</h1>
+    <p>We believe you are from @Model.City in @Model.Country</p>
+
+    <div class="col-sm-12">
+        <div id="map" style="height: 450px; width: 100%;"></div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        function initMap() {
+            var myLatLng = { lat: @Model.Latitude, lng: @Model.Longitude };
+
+            var map = new google.maps.Map(document.getElementById('map'),
+                {
+                    zoom: 4,
+                    center: myLatLng
+                });
+
+            var marker = new google.maps.Marker({
+                position: myLatLng,
+                map: map,
+                title: '@Model.Address Location'
+            });
+        }
+    </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDqX0zqt8PWTqRtk0PA6luVuOJiWSgbiw0&signed_in=false&callback=initMap"></script>
+}

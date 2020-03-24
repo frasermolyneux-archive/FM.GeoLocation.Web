@@ -1,6 +1,8 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using FM.GeoLocation.Client;
+using FM.GeoLocation.Contract.Models;
 using FM.GeoLocation.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,10 +27,27 @@ namespace FM.GeoLocation.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewBag.GeoData =
-                await _geoLocationClient.LookupAddress(_httpContext.HttpContext.Connection.RemoteIpAddress.ToString());
+            var address = _httpContext.HttpContext.Connection.RemoteIpAddress.ToString();
 
-            return View();
+            GeoLocationDto geoLocationDto;
+
+            try
+            {
+                geoLocationDto = await _geoLocationClient.LookupAddress(address);
+            }
+            catch (Exception e)
+            {
+                geoLocationDto = new GeoLocationDto
+                {
+                    Address = "Unknown",
+                    City = "Unknown",
+                    Country = "Unknown",
+                    Latitude = 0.0,
+                    Longitude = 0.0
+                };
+            }
+
+            return View(geoLocationDto);
         }
 
         public IActionResult Privacy()
