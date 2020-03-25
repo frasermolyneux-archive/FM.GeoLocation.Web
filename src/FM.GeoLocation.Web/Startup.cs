@@ -1,3 +1,4 @@
+using System;
 using FM.GeoLocation.Client;
 using FM.GeoLocation.Web.Configuration;
 using Microsoft.AspNetCore.Builder;
@@ -31,6 +32,8 @@ namespace FM.GeoLocation.Web
             services.AddSingleton<IGeoLocationClient, GeoLocationClient>();
 
             services.AddHttpContextAccessor();
+
+            services.AddSession();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -39,10 +42,10 @@ namespace FM.GeoLocation.Web
                 app.UseDeveloperExceptionPage();
             else
                 app.UseExceptionHandler("/Home/Error");
+
+            app.UseSession();
             app.UseStaticFiles();
-
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

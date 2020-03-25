@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using FM.GeoLocation.Client;
 using FM.GeoLocation.Contract.Models;
+using FM.GeoLocation.Web.Extensions;
 using FM.GeoLocation.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,7 @@ namespace FM.GeoLocation.Web.Controllers
 {
     public class HomeController : Controller
     {
+        private const string UserLocationSessionKey = "UserGeoLocationDto";
         private readonly IGeoLocationClient _geoLocationClient;
         private readonly IHttpContextAccessor _httpContext;
         private readonly ILogger<HomeController> _logger;
@@ -28,6 +30,12 @@ namespace FM.GeoLocation.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var address = _httpContext.HttpContext.Connection.RemoteIpAddress.ToString();
+
+            var sessionGeoLocationDto =
+                _httpContext.HttpContext.Session.GetObjectFromJson<GeoLocationDto>(UserLocationSessionKey);
+
+            if (sessionGeoLocationDto != null)
+                return View(sessionGeoLocationDto);
 
             GeoLocationDto geoLocationDto;
 
@@ -48,6 +56,8 @@ namespace FM.GeoLocation.Web.Controllers
                     Longitude = 0.0
                 };
             }
+
+            _httpContext.HttpContext.Session.SetObjectAsJson(UserLocationSessionKey, geoLocationDto);
 
             return View(geoLocationDto);
         }
