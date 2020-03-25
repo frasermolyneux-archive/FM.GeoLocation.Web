@@ -1,0 +1,71 @@
+﻿@model BatchLookupViewModel
+
+@{
+    ViewData["Title"] = "Batch Lookup";
+}
+
+@if (Model.GeoLocationDtos != null)
+{
+    <row>
+        <div class="text-center">
+            <div class="col-sm-12">
+                <div id="map" style="height: 450px; width: 100%;"></div>
+            </div>
+        </div>
+    </row>
+
+    <row>
+        <div style="padding-top: 20px">
+            <hr/>
+        </div>
+    </row>
+}
+
+<row>
+    <h1>@ViewData["Title"]</h1>
+
+    <form asp-controller="Home" asp-action="BatchLookup" method="post" autocomplete="false">
+        <div class="input-group">
+            <textarea id="addressData" name="addressData" class="form-control" type="text" rows="10">@Model.AddressData</textarea>
+            <span>
+                <button class="btn" type="submit" id="search">
+                    <span class="fa fa-search"></span>
+                </button>
+            </span>
+        </div>
+    </form>
+</row>
+
+@if (Model.GeoLocationDtos != null)
+{
+@section Scripts {
+    <script>
+        function initMap() {
+
+            var map = new google.maps.Map(document.getElementById('map'),
+                {
+                    zoom: 2,
+                    center: { lat: 0.00, lng: 0.00 }
+                });
+
+            var locations = [
+                @foreach (var location in Model.GeoLocationDtos.Where(location => location != null))
+                {
+                    <text>
+                        ['@location.Address', @location.Latitude, @location.Longitude],
+                    </text>
+                }
+            ];
+
+            for (count = 0; count < locations.length; count++) {
+                new google.maps.Marker({
+                    position: new google.maps.LatLng(locations[count][1], locations[count][2]),
+                    map: map,
+                    title: locations[count][0]
+                });
+            }
+        }
+    </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDqX0zqt8PWTqRtk0PA6luVuOJiWSgbiw0&signed_in=false&callback=initMap"></script>
+}}

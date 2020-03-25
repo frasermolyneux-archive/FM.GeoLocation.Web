@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using FM.GeoLocation.Client;
 using FM.GeoLocation.Contract.Models;
@@ -96,6 +98,51 @@ namespace FM.GeoLocation.Web.Controllers
             }
 
             return View(geoLocationDto);
+        }
+
+        [HttpGet]
+        public IActionResult BatchLookup()
+        {
+            return View(new BatchLookupViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BatchLookup(string addressData)
+        {
+            var model = new BatchLookupViewModel
+            {
+                AddressData = addressData
+            };
+
+            if (string.IsNullOrWhiteSpace(addressData))
+            {
+                ModelState.AddModelError(nameof(addressData), "You need to provide address data, one entry per line");
+                return View(model);
+            }
+
+            List<string> addresses;
+            try
+            {
+                addresses = addressData.Split(Environment.NewLine).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to parse address data");
+                ModelState.AddModelError(nameof(addressData), "Failed to parse address data");
+                return View(model);
+            }
+
+            try
+            {
+                model.GeoLocationDtos = await _geoLocationClient.LookupAddressBatch(addresses);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving geo-location data for {addresses}", addresses);
+            }
+
+            return View(model);
         }
     }
 }
