@@ -1,0 +1,67 @@
+﻿@model FM.GeoLocation.Contract.Models.GeoLocationDto
+
+@{
+    ViewData["Title"] = "Lookup Address";
+}
+
+@if (Model != null)
+{
+    <row>
+        <span class="clearfix"></span>
+
+        <div class="text-center">
+            <h1 class="display-4">You searched for @Model.Address</h1>
+            <p>The address is located in @Model.City, @Model.Country</p>
+
+            <div class="col-sm-12">
+                <div id="map" style="height: 450px; width: 100%;"></div>
+            </div>
+        </div>
+    </row>
+
+    <row>
+        <div style="padding-top: 20px">
+            <hr />
+        </div>
+    </row>
+}
+
+<row>
+    <h1>@ViewData["Title"]</h1>
+
+    <form asp-controller="Home" asp-action="LookupAddress" method="post" autocomplete="false">
+        <div class="input-group">
+            <input id="address" name="address" value="@Model?.Address" class="form-control" type="text">
+            <span>
+                <button class="btn" type="submit" id="search">
+                    <span class="fa fa-search"></span>
+                </button>
+            </span>
+        </div>
+    </form>
+</row>
+
+
+@if (Model != null)
+{
+@section Scripts {
+    <script>
+        function initMap() {
+            var myLatLng = { lat: @Model.Latitude, lng: @Model.Longitude };
+
+            var map = new google.maps.Map(document.getElementById('map'),
+                {
+                    zoom: 4,
+                    center: myLatLng
+                });
+
+            var marker = new google.maps.Marker({
+                position: myLatLng,
+                map: map,
+                title: '@Model.Address Location'
+            });
+        }
+    </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDqX0zqt8PWTqRtk0PA6luVuOJiWSgbiw0&signed_in=false&callback=initMap"></script>
+}}

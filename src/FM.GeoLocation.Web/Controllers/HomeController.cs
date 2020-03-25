@@ -35,8 +35,10 @@ namespace FM.GeoLocation.Web.Controllers
             {
                 geoLocationDto = await _geoLocationClient.LookupAddress(address);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error retrieving geo-location data for {address}", address);
+
                 geoLocationDto = new GeoLocationDto
                 {
                     Address = "Unknown",
@@ -59,6 +61,31 @@ namespace FM.GeoLocation.Web.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
+        }
+
+        [HttpGet]
+        public IActionResult LookupAddress()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LookupAddress(string address)
+        {
+            GeoLocationDto geoLocationDto;
+
+            try
+            {
+                geoLocationDto = await _geoLocationClient.LookupAddress(address);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving geo-location data for {address}", address);
+                geoLocationDto = null;
+            }
+
+            return View(geoLocationDto);
         }
     }
 }
