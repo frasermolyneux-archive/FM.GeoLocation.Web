@@ -108,28 +108,34 @@ namespace FM.GeoLocation.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BatchLookup(string addressData)
+        public async Task<IActionResult> BatchLookup(BatchLookupViewModel model)
         {
-            var model = new BatchLookupViewModel
+            if (!ModelState.IsValid)
             {
-                AddressData = addressData
-            };
+                return View(model);
+            }
 
-            if (string.IsNullOrWhiteSpace(addressData))
+            if (string.IsNullOrWhiteSpace(model.AddressData))
             {
-                ModelState.AddModelError(nameof(addressData), "You need to provide address data, one entry per line");
+                ModelState.AddModelError(nameof(model.AddressData), "You need to provide address data, one entry per line");
                 return View(model);
             }
 
             List<string> addresses;
             try
             {
-                addresses = addressData.Split(Environment.NewLine).ToList();
+                addresses = model.AddressData.Split(Environment.NewLine).ToList();
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Failed to parse address data");
-                ModelState.AddModelError(nameof(addressData), "Failed to parse address data");
+                ModelState.AddModelError(nameof(model.AddressData), "Failed to parse address data");
+                return View(model);
+            }
+
+            if (addresses.Count >= 20)
+            {
+                ModelState.AddModelError(nameof(model.AddressData), "You can only search for a maximum of 20 addresses in one request");
                 return View(model);
             }
 

@@ -26,12 +26,16 @@
 
     <form asp-controller="Home" asp-action="BatchLookup" method="post" autocomplete="false">
         <div class="input-group">
-            <textarea id="addressData" name="addressData" class="form-control" type="text" rows="10">@Model.AddressData</textarea>
+            <!--<textarea id="addressData" name="addressData" class="form-control" type="text" rows="10">@Model.AddressData</textarea>-->
+            <textarea asp-for="@Model.AddressData" class="form-control" rows="10"></textarea>
             <span>
                 <button class="btn" type="submit" id="search">
                     <span class="fa fa-search"></span>
                 </button>
             </span>
+        </div>
+        <div>
+            <span class="text-danger">@Html.ValidationSummary(false)</span>
         </div>
     </form>
 </row>
