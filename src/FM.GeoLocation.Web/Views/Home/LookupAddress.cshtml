@@ -1,15 +1,15 @@
-﻿@model FM.GeoLocation.Contract.Models.GeoLocationDto
+﻿@model LookupAddressViewModel
 
 @{
     ViewData["Title"] = "Lookup Address";
 }
 
-@if (Model != null)
+@if (Model.GeoLocationDto != null)
 {
     <row>
         <div class="text-center">
-            <h1 class="display-4">You searched for @Model.Address</h1>
-            <p>The address is located in @Model.City, @Model.Country</p>
+            <h1 class="display-4">You searched for @Model.AddressData</h1>
+            <p>The address is located in @Model.GeoLocationDto.City, @Model.GeoLocationDto.Country</p>
 
             <div class="col-sm-12">
                 <div id="map" style="height: 450px; width: 100%;"></div>
@@ -29,23 +29,26 @@
 
     <form asp-controller="Home" asp-action="LookupAddress" method="post" autocomplete="false">
         <div class="input-group">
-            <input id="address" name="address" value="@Model?.Address" class="form-control" type="text">
+            <input asp-for="@Model.AddressData" class="form-control">
             <span>
                 <button class="btn" type="submit" id="search">
                     <span class="fa fa-search"></span>
                 </button>
             </span>
         </div>
+        <div>
+            <span class="text-danger">@Html.ValidationSummary(false)</span>
+        </div>
     </form>
 </row>
 
 
-@if (Model != null)
+@if (Model.GeoLocationDto != null)
 {
 @section Scripts {
     <script>
         function initMap() {
-            var myLatLng = { lat: @Model.Latitude, lng: @Model.Longitude };
+            var myLatLng = { lat: @Model.GeoLocationDto.Latitude, lng: @Model.GeoLocationDto.Longitude };
 
             var map = new google.maps.Map(document.getElementById('map'),
                 {
@@ -56,7 +59,7 @@
             var marker = new google.maps.Marker({
                 position: myLatLng,
                 map: map,
-                title: '@Model.Address Location'
+                title: '@Model.AddressData Location'
             });
         }
     </script>

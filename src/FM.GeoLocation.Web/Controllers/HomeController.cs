@@ -97,26 +97,35 @@ namespace FM.GeoLocation.Web.Controllers
         [HttpGet]
         public IActionResult LookupAddress()
         {
-            return View();
+            return View(new LookupAddressViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LookupAddress(string address)
+        public async Task<IActionResult> LookupAddress(LookupAddressViewModel model)
         {
-            GeoLocationDto geoLocationDto;
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            if (string.IsNullOrWhiteSpace(model.AddressData))
+            {
+                ModelState.AddModelError(nameof(model.AddressData), "You need to provide address data");
+                return View(model);
+            }
 
             try
             {
-                geoLocationDto = await _geoLocationClient.LookupAddress(address);
+                model.GeoLocationDto = await _geoLocationClient.LookupAddress(model.AddressData);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving geo-location data for {address}", address);
-                geoLocationDto = null;
+                _logger.LogError(ex, "Error retrieving geo-location data for {address}", model.AddressData);
+                ModelState.AddModelError(nameof(model.AddressData), "Failed to perform a geo-lookup for this address");
             }
 
-            return View(geoLocationDto);
+            return View(model);
         }
 
         [HttpGet]
@@ -165,6 +174,7 @@ namespace FM.GeoLocation.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving geo-location data for {addresses}", addresses);
+                ModelState.AddModelError(nameof(model.AddressData), "Failed to perform a geo-lookup for this address batch");
             }
 
             return View(model);
