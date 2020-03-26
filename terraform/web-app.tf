@@ -21,8 +21,8 @@ resource "azurerm_app_service" "app-service" {
   app_service_plan_id = "${azurerm_app_service_plan.app-service-plan.id}"
 }
 
-resource "azurerm_app_service_custom_hostname_binding" "geolocation-net" {
-  hostname = "geolocation.net"
+resource "azurerm_app_service_custom_hostname_binding" "geo-location-net" {
+  hostname = "geo-location.net"
   app_service_name = "${azurerm_app_service.app-service.name}"
   resource_group_name = "${azurerm_resource_group.resource-group.name}"
 }
