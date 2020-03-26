@@ -4,12 +4,12 @@
     ViewData["Title"] = "Lookup Address";
 }
 
-@if (Model.GeoLocationDto != null)
+@if (Model.LookupAddressResponse != null && Model.LookupAddressResponse.Success)
 {
     <row>
         <div class="text-center">
             <h1 class="display-4">You searched for @Model.AddressData</h1>
-            <p>The address is located in @Model.GeoLocationDto.City, @Model.GeoLocationDto.Country</p>
+            <p>The address is located in @Model.LookupAddressResponse.GeoLocationDto.CityName, @Model.LookupAddressResponse.GeoLocationDto.CountryName</p>
 
             <div class="col-sm-12">
                 <div id="map" style="height: 450px; width: 100%;"></div>
@@ -42,13 +42,12 @@
     </form>
 </row>
 
-
-@if (Model.GeoLocationDto != null)
+@if (Model.LookupAddressResponse != null && Model.LookupAddressResponse.Success)
 {
-@section Scripts {
-    <script>
+    @section Scripts {
+        <script>
         function initMap() {
-            var myLatLng = { lat: @Model.GeoLocationDto.Latitude, lng: @Model.GeoLocationDto.Longitude };
+            var myLatLng = { lat: @Model.LookupAddressResponse.GeoLocationDto.Latitude, lng: @Model.LookupAddressResponse.GeoLocationDto.Longitude };
 
             var map = new google.maps.Map(document.getElementById('map'),
                 {
@@ -62,7 +61,7 @@
                 title: '@Model.AddressData Location'
             });
         }
-    </script>
+        </script>
 
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDqX0zqt8PWTqRtk0PA6luVuOJiWSgbiw0&signed_in=false&callback=initMap"></script>
-}}
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDqX0zqt8PWTqRtk0PA6luVuOJiWSgbiw0&signed_in=false&callback=initMap"></script>
+    }}

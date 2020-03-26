@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using FM.GeoLocation.Contract.Models;
 
 namespace FM.GeoLocation.Web.Models
@@ -11,6 +10,6 @@ namespace FM.GeoLocation.Web.Models
         [DataType(DataType.MultilineText)]
         public string AddressData { get; set; }
 
-        public List<GeoLocationDto> GeoLocationDtos { get; set; }
+        public LookupAddressBatchResponse LookupAddressBatchResponse { get; set; }
     }
 }

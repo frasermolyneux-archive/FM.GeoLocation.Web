@@ -1,11 +1,11 @@
-﻿@model FM.GeoLocation.Contract.Models.GeoLocationDto
+﻿@model FM.GeoLocation.Contract.Models.LookupAddressResponse
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome - @Model.Address</h1>
-    <p>We believe you are from @Model.CityName, @Model.CountryName</p>
+    <h1 class="display-4">Welcome - @Model.GeoLocationDto?.Address</h1>
+    <p>We believe you are from @Model.GeoLocationDto?.CityName, @Model.GeoLocationDto?.CountryName</p>
 
     <div class="col-sm-12">
         <div id="map" style="height: 450px; width: 100%;"></div>
@@ -15,7 +15,7 @@
 @section Scripts {
     <script>
         function initMap() {
-            var myLatLng = { lat: @Model.Latitude, lng: @Model.Longitude };
+            var myLatLng = { lat: @Model.GeoLocationDto?.Latitude, lng: @Model.GeoLocationDto?.Longitude };
 
             var map = new google.maps.Map(document.getElementById('map'),
                 {
@@ -26,10 +26,11 @@
             var marker = new google.maps.Marker({
                 position: myLatLng,
                 map: map,
-                title: '@Model.Address Location'
+                title: '@Model.GeoLocationDto?.Address Location'
             });
         }
     </script>
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDqX0zqt8PWTqRtk0PA6luVuOJiWSgbiw0&signed_in=false&callback=initMap"></script>
 }
+

@@ -19,68 +19,45 @@ namespace FM.GeoLocation.Web.Controllers
         private const string UserLocationSessionKey = "UserGeoLocationDto";
         private readonly IGeoLocationClient _geoLocationClient;
         private readonly IHttpContextAccessor _httpContext;
+        private readonly IAddressValidator _addressValidator;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger,
             IGeoLocationClient geoLocationClient,
-            IHttpContextAccessor httpContext)
+            IHttpContextAccessor httpContext,
+            IAddressValidator addressValidator)
         {
-            _logger = logger;
-            _geoLocationClient = geoLocationClient;
-            _httpContext = httpContext;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _geoLocationClient = geoLocationClient ?? throw new ArgumentNullException(nameof(geoLocationClient));
+            _httpContext = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
+            _addressValidator = addressValidator ?? throw new ArgumentNullException(nameof(addressValidator));
         }
 
         public async Task<IActionResult> Index()
         {
-            const string cfConnectingIpKey = "CF-Connecting-IP";
-            const string xForwardedForHeaderKey = "X-Forwarded-For";
-
-            IPAddress address = null;
-
-            if (_httpContext.HttpContext.Request.Headers.ContainsKey(cfConnectingIpKey))
-            {
-                var cfConnectingIp = _httpContext.HttpContext.Request.Headers[cfConnectingIpKey];
-                IPAddress.TryParse(cfConnectingIp, out address);
-            }
-
-            if (address == null && _httpContext.HttpContext.Request.Headers.ContainsKey(xForwardedForHeaderKey))
-            {
-                var forwardedAddress = _httpContext.HttpContext.Request.Headers[xForwardedForHeaderKey];
-                IPAddress.TryParse(forwardedAddress, out address);
-            }
-
-            if (address == null)
-                address = _httpContext.HttpContext.Connection.RemoteIpAddress;
-
             var sessionGeoLocationDto =
-                _httpContext.HttpContext.Session.GetObjectFromJson<GeoLocationDto>(UserLocationSessionKey);
+                _httpContext.HttpContext.Session.GetObjectFromJson<LookupAddressResponse>(UserLocationSessionKey);
 
             if (sessionGeoLocationDto != null)
                 return View(sessionGeoLocationDto);
 
-            GeoLocationDto geoLocationDto;
+            var address = GetUsersIpForLookup();
+
+            LookupAddressResponse lookupAddressResponse;
 
             try
             {
-                geoLocationDto = await _geoLocationClient.LookupAddress(address.ToString());
+                lookupAddressResponse = await _geoLocationClient.LookupAddress(address.ToString());
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving geo-location data for {address}", address);
-
-                geoLocationDto = new GeoLocationDto
-                {
-                    Address = "Unknown",
-                    CityName = "Unknown",
-                    CountryName = "Unknown",
-                    Latitude = 0.0,
-                    Longitude = 0.0
-                };
+                return Error();
             }
 
-            _httpContext.HttpContext.Session.SetObjectAsJson(UserLocationSessionKey, geoLocationDto);
+            _httpContext.HttpContext.Session.SetObjectAsJson(UserLocationSessionKey, lookupAddressResponse);
 
-            return View(geoLocationDto);
+            return View(lookupAddressResponse);
         }
 
         public IActionResult Privacy()
@@ -116,18 +93,32 @@ namespace FM.GeoLocation.Web.Controllers
 
             if (string.IsNullOrWhiteSpace(model.AddressData))
             {
-                ModelState.AddModelError(nameof(model.AddressData), "You need to provide address data");
+                ModelState.AddModelError(nameof(model.AddressData), 
+                    "You must provide an address to query against. IP or DNS is acceptable.");
+                return View(model);
+            }
+
+            if (!_addressValidator.ConvertAddress(model.AddressData, out var validatedAddress))
+            {
+                ModelState.AddModelError(nameof(model.AddressData),
+                    "The address provided is invalid. IP or DNS is acceptable.");
                 return View(model);
             }
 
             try
             {
-                model.GeoLocationDto = await _geoLocationClient.LookupAddress(model.AddressData);
+                model.LookupAddressResponse = await _geoLocationClient.LookupAddress(model.AddressData);
+
+                if (!model.LookupAddressResponse.Success)
+                {
+                    ModelState.AddModelError(nameof(model.AddressData), model.LookupAddressResponse.ErrorMessage);
+                    return View(model);
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving geo-location data for {address}", model.AddressData);
-                ModelState.AddModelError(nameof(model.AddressData), "Failed to perform a geo-lookup for this address");
+                return Error();
             }
 
             return View(model);
@@ -147,8 +138,8 @@ namespace FM.GeoLocation.Web.Controllers
 
             if (string.IsNullOrWhiteSpace(model.AddressData))
             {
-                ModelState.AddModelError(nameof(model.AddressData),
-                    "You need to provide address data, one entry per line");
+                ModelState.AddModelError(nameof(model.AddressData), 
+                    "You must provide a line separated list of addresses. IP or DNS is acceptable.");
                 return View(model);
             }
 
@@ -157,10 +148,9 @@ namespace FM.GeoLocation.Web.Controllers
             {
                 addresses = model.AddressData.Split(Environment.NewLine).ToList();
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogWarning(ex, "Failed to parse address data");
-                ModelState.AddModelError(nameof(model.AddressData), "Failed to parse address data");
+                ModelState.AddModelError(nameof(model.AddressData), "Invalid data, you must provide a line separated list of addresses. IP or DNS is acceptable.");
                 return View(model);
             }
 
@@ -173,16 +163,97 @@ namespace FM.GeoLocation.Web.Controllers
 
             try
             {
-                model.GeoLocationDtos = await _geoLocationClient.LookupAddressBatch(addresses);
+                model.LookupAddressBatchResponse = await _geoLocationClient.LookupAddressBatch(addresses);
+
+                if (!model.LookupAddressBatchResponse.Success)
+                {
+                    ModelState.AddModelError(nameof(model.AddressData), model.LookupAddressBatchResponse.ErrorMessage);
+                    return View(model);
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving geo-location data for {addresses}", addresses);
-                ModelState.AddModelError(nameof(model.AddressData),
-                    "Failed to perform a geo-lookup for this address batch");
+                _logger.LogError(ex, "Error retrieving geo-location data for {addressData}", model.AddressData);
+                return Error();
             }
 
             return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult RemoveData()
+        {
+            var model = new RemoveMyDataViewModel
+            {
+                AddressData = GetUsersIpForLookup().ToString()
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveData(RemoveMyDataViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            if (string.IsNullOrWhiteSpace(model.AddressData))
+            {
+                ModelState.AddModelError(nameof(model.AddressData),
+                    "You must provide an address to query against. IP or DNS is acceptable.");
+                return View(model);
+            }
+
+            if (!_addressValidator.ConvertAddress(model.AddressData, out var validatedAddress))
+            {
+                ModelState.AddModelError(nameof(model.AddressData),
+                    "The address provided is invalid. IP or DNS is acceptable.");
+                return View(model);
+            }
+
+            try
+            {
+                var removeDataForAddressResponse = await _geoLocationClient.RemoveDataForAddress(model.AddressData);
+
+                if (!removeDataForAddressResponse.Success)
+                {
+                    ModelState.AddModelError(nameof(model.AddressData), removeDataForAddressResponse.ErrorMessage);
+                    return View(model);
+                }
+
+                model.RemoveDataForAddressResponse = removeDataForAddressResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing geo-location data for {address}", model.AddressData);
+                return Error();
+            }
+
+            return View(model);
+        }
+
+        private IPAddress GetUsersIpForLookup()
+        {
+            const string cfConnectingIpKey = "CF-Connecting-IP";
+            const string xForwardedForHeaderKey = "X-Forwarded-For";
+
+            IPAddress address = null;
+
+            if (_httpContext.HttpContext.Request.Headers.ContainsKey(cfConnectingIpKey))
+            {
+                var cfConnectingIp = _httpContext.HttpContext.Request.Headers[cfConnectingIpKey];
+                IPAddress.TryParse(cfConnectingIp, out address);
+            }
+
+            if (address == null && _httpContext.HttpContext.Request.Headers.ContainsKey(xForwardedForHeaderKey))
+            {
+                var forwardedAddress = _httpContext.HttpContext.Request.Headers[xForwardedForHeaderKey];
+                IPAddress.TryParse(forwardedAddress, out address);
+            }
+
+            if (address == null)
+                address = _httpContext.HttpContext.Connection.RemoteIpAddress;
+
+            return address;
         }
     }
 }

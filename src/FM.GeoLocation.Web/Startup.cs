@@ -30,6 +30,7 @@ namespace FM.GeoLocation.Web
             // Geo Location
             services.AddSingleton<IGeoLocationClientConfiguration, GeoLocationClientConfiguration>();
             services.AddSingleton<IGeoLocationClient, GeoLocationClient>();
+            services.AddSingleton<IAddressValidator, AddressValidator>();
 
             services.AddHttpContextAccessor();
 
