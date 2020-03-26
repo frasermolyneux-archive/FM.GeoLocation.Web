@@ -95,19 +95,24 @@ namespace FM.GeoLocation.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult LookupAddress()
+        public async Task<IActionResult> LookupAddress(string id)
         {
-            return View(new LookupAddressViewModel());
+            if (string.IsNullOrWhiteSpace(id))
+                return View(new LookupAddressViewModel());
+
+            var model = new LookupAddressViewModel
+            {
+                AddressData = id
+            };
+
+            return await LookupAddress(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LookupAddress(LookupAddressViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
             if (string.IsNullOrWhiteSpace(model.AddressData))
             {
@@ -138,14 +143,12 @@ namespace FM.GeoLocation.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BatchLookup(BatchLookupViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
             if (string.IsNullOrWhiteSpace(model.AddressData))
             {
-                ModelState.AddModelError(nameof(model.AddressData), "You need to provide address data, one entry per line");
+                ModelState.AddModelError(nameof(model.AddressData),
+                    "You need to provide address data, one entry per line");
                 return View(model);
             }
 
@@ -163,7 +166,8 @@ namespace FM.GeoLocation.Web.Controllers
 
             if (addresses.Count >= 20)
             {
-                ModelState.AddModelError(nameof(model.AddressData), "You can only search for a maximum of 20 addresses in one request");
+                ModelState.AddModelError(nameof(model.AddressData),
+                    "You can only search for a maximum of 20 addresses in one request");
                 return View(model);
             }
 
@@ -174,7 +178,8 @@ namespace FM.GeoLocation.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving geo-location data for {addresses}", addresses);
-                ModelState.AddModelError(nameof(model.AddressData), "Failed to perform a geo-lookup for this address batch");
+                ModelState.AddModelError(nameof(model.AddressData),
+                    "Failed to perform a geo-lookup for this address batch");
             }
 
             return View(model);
