@@ -39,8 +39,8 @@ namespace FM.GeoLocation.Web.Controllers
 
             if (_httpContext.HttpContext.Request.Headers.ContainsKey(cfConnectingIpKey))
             {
-                var forwardedAddress = _httpContext.HttpContext.Request.Headers[cfConnectingIpKey];
-                IPAddress.TryParse(forwardedAddress, out address);
+                var cfConnectingIp = _httpContext.HttpContext.Request.Headers[cfConnectingIpKey];
+                IPAddress.TryParse(cfConnectingIp, out address);
             }
 
             if (address != null &&_httpContext.HttpContext.Request.Headers.ContainsKey(xForwardedForHeaderKey))
