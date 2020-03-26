@@ -71,8 +71,8 @@ namespace FM.GeoLocation.Web.Controllers
                 geoLocationDto = new GeoLocationDto
                 {
                     Address = "Unknown",
-                    City = "Unknown",
-                    Country = "Unknown",
+                    CityName = "Unknown",
+                    CountryName = "Unknown",
                     Latitude = 0.0,
                     Longitude = 0.0
                 };
