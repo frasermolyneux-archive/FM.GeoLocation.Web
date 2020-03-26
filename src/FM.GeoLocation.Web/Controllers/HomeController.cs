@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using FM.GeoLocation.Client;
 using FM.GeoLocation.Contract.Models;
@@ -31,7 +32,25 @@ namespace FM.GeoLocation.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var address = _httpContext.HttpContext.Connection.RemoteIpAddress.ToString();
+            const string cfConnectingIpKey = "CF-Connecting-IP";
+            const string xForwardedForHeaderKey = "X-Forwarded-For";
+
+            IPAddress address = null;
+
+            if (_httpContext.HttpContext.Request.Headers.ContainsKey(cfConnectingIpKey))
+            {
+                var forwardedAddress = _httpContext.HttpContext.Request.Headers[cfConnectingIpKey];
+                IPAddress.TryParse(forwardedAddress, out address);
+            }
+
+            if (address != null &&_httpContext.HttpContext.Request.Headers.ContainsKey(xForwardedForHeaderKey))
+            {
+                var forwardedAddress = _httpContext.HttpContext.Request.Headers[xForwardedForHeaderKey];
+                IPAddress.TryParse(forwardedAddress, out address);
+            }
+
+            if (address == null)
+                address = _httpContext.HttpContext.Connection.RemoteIpAddress;
 
             var sessionGeoLocationDto =
                 _httpContext.HttpContext.Session.GetObjectFromJson<GeoLocationDto>(UserLocationSessionKey);
@@ -43,7 +62,7 @@ namespace FM.GeoLocation.Web.Controllers
 
             try
             {
-                geoLocationDto = await _geoLocationClient.LookupAddress(address);
+                geoLocationDto = await _geoLocationClient.LookupAddress(address.ToString());
             }
             catch (Exception ex)
             {
