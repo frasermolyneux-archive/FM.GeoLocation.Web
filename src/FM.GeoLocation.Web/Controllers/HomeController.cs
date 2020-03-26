@@ -43,7 +43,7 @@ namespace FM.GeoLocation.Web.Controllers
                 IPAddress.TryParse(cfConnectingIp, out address);
             }
 
-            if (address != null &&_httpContext.HttpContext.Request.Headers.ContainsKey(xForwardedForHeaderKey))
+            if (address == null && _httpContext.HttpContext.Request.Headers.ContainsKey(xForwardedForHeaderKey))
             {
                 var forwardedAddress = _httpContext.HttpContext.Request.Headers[xForwardedForHeaderKey];
                 IPAddress.TryParse(forwardedAddress, out address);
