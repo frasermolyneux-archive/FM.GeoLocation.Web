@@ -9,8 +9,8 @@ resource "azurerm_app_service_plan" "app-service-plan" {
     location = "${azurerm_resource_group.resource-group.location}"
 
     sku {
-        tier = "Basic"
-        size = "B1"
+        tier = "Shared"
+        size = "D1"
     }
 }
 
