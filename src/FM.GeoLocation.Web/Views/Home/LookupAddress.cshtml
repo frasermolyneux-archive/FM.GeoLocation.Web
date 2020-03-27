@@ -10,16 +10,78 @@
         <div class="text-center">
             <h1 class="display-4">You searched for @Model.AddressData</h1>
             <p>The address is located in @Model.LookupAddressResponse.GeoLocationDto.CityName, @Model.LookupAddressResponse.GeoLocationDto.CountryName</p>
-
-            <div class="col-sm-12">
-                <div id="map" style="height: 450px; width: 100%;"></div>
-            </div>
         </div>
     </row>
 
-    <row>
+    <row class="row">
+        <div class="col-sm-8">
+            <div id="map" style="height: 450px; width: 100%;"></div>
+        </div>
+
+        <div class="col-sm-4">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Attribute</th>
+                    <th scope="col">Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Accuracy Radius (KM)</td>
+                    <td>@Model.LookupAddressResponse.GeoLocationDto.AccuracyRadius</td>
+                </tr>
+                <tr>
+                    <td>Latitude, Longitude</td>
+                    <td>@Model.LookupAddressResponse.GeoLocationDto.Latitude, @Model.LookupAddressResponse.GeoLocationDto.Longitude</td>
+                </tr>
+                <tr>
+                    <td>IP Address</td>
+                    <td>@Model.LookupAddressResponse.GeoLocationDto.TranslatedAddress</td>
+                </tr>
+                @if (Model.LookupAddressResponse.GeoLocationDto.PostalCode != null)
+                {
+                    <tr>
+                        <td>Postal Code</td>
+                        <td>@Model.LookupAddressResponse.GeoLocationDto.PostalCode</td>
+                    </tr>
+                }
+                <tr>
+                    <td>Timezone</td>
+                    <td>@Model.LookupAddressResponse.GeoLocationDto.Timezone</td>
+                </tr>
+                </tbody>
+            </table>
+            <button class="btn-primary" data-toggle="collapse" data-target="#traits">View All Traits</button>
+        </div>
+    </row>
+
+    <row class="row">
+        <div id="traits" class="col-sm-12 collapse" style="margin-top: 20px">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Trait</th>
+                    <th scope="col">Value</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                @foreach (var trait in Model.LookupAddressResponse.GeoLocationDto.Traits.Where(trait => !string.IsNullOrWhiteSpace(trait.Value)))
+                {
+                    <tr>
+                        <td>@trait.Key</td>
+                        <td>@trait.Value</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </row>
+
+    <row class="row">
         <div style="padding-top: 20px">
-            <hr />
+            <hr/>
         </div>
     </row>
 }
@@ -44,10 +106,13 @@
 
 @if (Model.LookupAddressResponse != null && Model.LookupAddressResponse.Success)
 {
-    @section Scripts {
-        <script>
+@section Scripts {
+    <script>
         function initMap() {
-            var myLatLng = { lat: @Model.LookupAddressResponse.GeoLocationDto.Latitude, lng: @Model.LookupAddressResponse.GeoLocationDto.Longitude };
+            var myLatLng = {
+                lat: @Model.LookupAddressResponse.GeoLocationDto.Latitude,
+                lng: @Model.LookupAddressResponse.GeoLocationDto.Longitude
+            };
 
             var map = new google.maps.Map(document.getElementById('map'),
                 {
@@ -61,7 +126,7 @@
                 title: '@Model.AddressData Location'
             });
         }
-        </script>
+    </script>
 
-        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDqX0zqt8PWTqRtk0PA6luVuOJiWSgbiw0&signed_in=false&callback=initMap"></script>
-    }}
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDqX0zqt8PWTqRtk0PA6luVuOJiWSgbiw0&signed_in=false&callback=initMap"></script>
+}}
