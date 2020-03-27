@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "resource-group" {
     name = "FM-GeoLocation-Web-${var.environment}"
-    location = "${var.region}"
+    location = var.region
 }
 
 resource "azurerm_app_service_plan" "app-service-plan" {
