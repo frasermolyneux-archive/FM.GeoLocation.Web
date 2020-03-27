@@ -37,7 +37,7 @@
                 </tr>
                 <tr>
                     <td>IP Address</td>
-                    <td>@Model.LookupAddressResponse.GeoLocationDto.TranslatedAddress</td>
+                    <td><img src="~/images/flags/@(Model.LookupAddressResponse.GeoLocationDto.CountryCode.ToLower()).png" /> @Model.LookupAddressResponse.GeoLocationDto.TranslatedAddress</td>
                 </tr>
                 @if (Model.LookupAddressResponse.GeoLocationDto.PostalCode != null)
                 {

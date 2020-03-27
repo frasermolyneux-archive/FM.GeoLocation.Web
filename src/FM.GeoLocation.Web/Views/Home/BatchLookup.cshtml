@@ -29,7 +29,7 @@
             @foreach (var lookupAddressResponse in Model.LookupAddressBatchResponse.LookupAddressResponses.Where(lar => lar.Success))
             {
                 <tr>
-                    <td>@lookupAddressResponse.GeoLocationDto.TranslatedAddress</td>
+                    <td><img src="~/images/flags/@(lookupAddressResponse.GeoLocationDto.CountryCode.ToLower()).png" /> @lookupAddressResponse.GeoLocationDto.TranslatedAddress</td>
                     <td>@lookupAddressResponse.GeoLocationDto.AccuracyRadius</td>
                     <td>@lookupAddressResponse.GeoLocationDto.Latitude, @lookupAddressResponse.GeoLocationDto.Longitude</td>
                     <td>@(lookupAddressResponse.GeoLocationDto.PostalCode ?? "unknown")</td>
