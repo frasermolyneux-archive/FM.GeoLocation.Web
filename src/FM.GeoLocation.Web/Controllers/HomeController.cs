@@ -8,8 +8,10 @@ using FM.GeoLocation.Client;
 using FM.GeoLocation.Contract.Models;
 using FM.GeoLocation.Web.Extensions;
 using FM.GeoLocation.Web.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace FM.GeoLocation.Web.Controllers
@@ -20,17 +22,20 @@ namespace FM.GeoLocation.Web.Controllers
         private readonly IGeoLocationClient _geoLocationClient;
         private readonly IHttpContextAccessor _httpContext;
         private readonly IAddressValidator _addressValidator;
+        private readonly IWebHostEnvironment _environment;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger,
             IGeoLocationClient geoLocationClient,
             IHttpContextAccessor httpContext,
-            IAddressValidator addressValidator)
+            IAddressValidator addressValidator,
+            IWebHostEnvironment environment)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _geoLocationClient = geoLocationClient ?? throw new ArgumentNullException(nameof(geoLocationClient));
             _httpContext = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
             _addressValidator = addressValidator ?? throw new ArgumentNullException(nameof(addressValidator));
+            _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }
 
         public async Task<IActionResult> Index()
@@ -235,6 +240,11 @@ namespace FM.GeoLocation.Web.Controllers
         {
             const string cfConnectingIpKey = "CF-Connecting-IP";
             const string xForwardedForHeaderKey = "X-Forwarded-For";
+
+            if (_environment.IsDevelopment())
+            {
+                return IPAddress.Parse("162.25.25.25");
+            }
 
             IPAddress address = null;
 
