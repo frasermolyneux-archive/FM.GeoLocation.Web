@@ -19,10 +19,12 @@ namespace FM.GeoLocation.Web.Controllers
     public class HomeController : Controller
     {
         private const string UserLocationSessionKey = "UserGeoLocationDto";
-        private readonly IGeoLocationClient _geoLocationClient;
-        private readonly IHttpContextAccessor _httpContext;
+        private const string BatchLookupSessionKey = "BatchLookupAddressData";
         private readonly IAddressValidator _addressValidator;
         private readonly IWebHostEnvironment _environment;
+
+        private readonly IGeoLocationClient _geoLocationClient;
+        private readonly IHttpContextAccessor _httpContext;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger,
@@ -98,7 +100,7 @@ namespace FM.GeoLocation.Web.Controllers
 
             if (string.IsNullOrWhiteSpace(model.AddressData))
             {
-                ModelState.AddModelError(nameof(model.AddressData), 
+                ModelState.AddModelError(nameof(model.AddressData),
                     "You must provide an address to query against. IP or DNS is acceptable.");
                 return View(model);
             }
@@ -132,6 +134,13 @@ namespace FM.GeoLocation.Web.Controllers
         [HttpGet]
         public IActionResult BatchLookup()
         {
+            var addressData = _httpContext.HttpContext.Session.GetString(BatchLookupSessionKey);
+
+            if (!string.IsNullOrWhiteSpace(addressData))
+                return View(new BatchLookupViewModel
+                {
+                    AddressData = addressData
+                });
             return View(new BatchLookupViewModel());
         }
 
@@ -139,11 +148,13 @@ namespace FM.GeoLocation.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BatchLookup(BatchLookupViewModel model)
         {
+            _httpContext.HttpContext.Session.SetString(BatchLookupSessionKey, model.AddressData);
+
             if (!ModelState.IsValid) return View(model);
 
             if (string.IsNullOrWhiteSpace(model.AddressData))
             {
-                ModelState.AddModelError(nameof(model.AddressData), 
+                ModelState.AddModelError(nameof(model.AddressData),
                     "You must provide a line separated list of addresses. IP or DNS is acceptable.");
                 return View(model);
             }
@@ -155,7 +166,8 @@ namespace FM.GeoLocation.Web.Controllers
             }
             catch
             {
-                ModelState.AddModelError(nameof(model.AddressData), "Invalid data, you must provide a line separated list of addresses. IP or DNS is acceptable.");
+                ModelState.AddModelError(nameof(model.AddressData),
+                    "Invalid data, you must provide a line separated list of addresses. IP or DNS is acceptable.");
                 return View(model);
             }
 
@@ -241,10 +253,7 @@ namespace FM.GeoLocation.Web.Controllers
             const string cfConnectingIpKey = "CF-Connecting-IP";
             const string xForwardedForHeaderKey = "X-Forwarded-For";
 
-            if (_environment.IsDevelopment())
-            {
-                return IPAddress.Parse("162.25.25.25");
-            }
+            if (_environment.IsDevelopment()) return IPAddress.Parse("162.25.25.25");
 
             IPAddress address = null;
 
