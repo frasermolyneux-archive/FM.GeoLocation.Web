@@ -1,4 +1,5 @@
-﻿@model LookupAddressViewModel
+﻿@using FM.GeoLocation.Web.Extensions
+@model LookupAddressViewModel
 
 @{
     ViewData["Title"] = "Lookup Address";
@@ -9,7 +10,7 @@
     <row>
         <div class="text-center">
             <h1 class="display-4">You searched for @Model.AddressData</h1>
-            <p>The address is located in @Model.LookupAddressResponse.GeoLocationDto.CityName, @Model.LookupAddressResponse.GeoLocationDto.CountryName</p>
+            <p>The address is located in @Model.LookupAddressResponse.GeoLocationDto.LocationSummary()</p>
         </div>
     </row>
 
@@ -37,7 +38,9 @@
                 </tr>
                 <tr>
                     <td>IP Address</td>
-                    <td><img src="~/images/flags/@(Model.LookupAddressResponse.GeoLocationDto.CountryCode.ToLower()).png" /> @Model.LookupAddressResponse.GeoLocationDto.TranslatedAddress</td>
+                    <td>
+                        @Model.LookupAddressResponse.GeoLocationDto.FlagImage() @Model.LookupAddressResponse.GeoLocationDto.TranslatedAddress
+                    </td>
                 </tr>
                 @if (Model.LookupAddressResponse.GeoLocationDto.PostalCode != null)
                 {
