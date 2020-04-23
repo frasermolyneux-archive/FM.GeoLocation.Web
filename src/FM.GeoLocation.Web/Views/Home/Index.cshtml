@@ -18,35 +18,36 @@
     <div class="col-sm-4">
         <table class="table">
             <thead>
-                <tr>
-                    <th scope="col">Attribute</th>
-                    <th scope="col">Value</th>
-                </tr>
+            <tr>
+                <th scope="col">Attribute</th>
+                <th scope="col">Value</th>
+            </tr>
             </thead>
             <tbody>
+            <tr>
+                <td>Accuracy Radius (KM)</td>
+                <td>@Model.GeoLocationDto.AccuracyRadius</td>
+            </tr>
+            <tr>
+                <td>Latitude, Longitude</td>
+                <td>@Model.GeoLocationDto.Latitude, @Model.GeoLocationDto.Longitude</td>
+            </tr>
+            <tr>
+                <td>IP Address</td>
+                <td>
+                    <img src="~/images/flags/@(Model.GeoLocationDto.CountryCode.ToLower()).png"/> @Model.GeoLocationDto.TranslatedAddress</td>
+            </tr>
+            @if (Model.GeoLocationDto.PostalCode != null)
+            {
                 <tr>
-                    <td>Accuracy Radius (KM)</td>
-                    <td>@Model.GeoLocationDto.AccuracyRadius</td>
+                    <td>Postal Code</td>
+                    <td>@Model.GeoLocationDto.PostalCode</td>
                 </tr>
-                <tr>
-                    <td>Latitude, Longitude</td>
-                    <td>@Model.GeoLocationDto.Latitude, @Model.GeoLocationDto.Longitude</td>
-                </tr>
-                <tr>
-                    <td>IP Address</td>
-                    <td><img src="~/images/flags/@(Model.GeoLocationDto.CountryCode.ToLower()).png" /> @Model.GeoLocationDto.TranslatedAddress</td>
-                </tr>
-                @if (Model.GeoLocationDto.PostalCode != null)
-                {
-                    <tr>
-                        <td>Postal Code</td>
-                        <td>@Model.GeoLocationDto.PostalCode</td>
-                    </tr>
-                }
-                <tr>
-                    <td>Timezone</td>
-                    <td>@Model.GeoLocationDto.Timezone</td>
-                </tr>
+            }
+            <tr>
+                <td>Timezone</td>
+                <td>@Model.GeoLocationDto.Timezone</td>
+            </tr>
             </tbody>
         </table>
         <button class="btn-primary" data-toggle="collapse" data-target="#traits">View All Traits</button>

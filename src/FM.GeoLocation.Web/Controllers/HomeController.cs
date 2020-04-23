@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using FM.GeoLocation.Client;
+using FM.GeoLocation.Contract.Interfaces;
 using FM.GeoLocation.Contract.Models;
 using FM.GeoLocation.Web.Extensions;
 using FM.GeoLocation.Web.Models;

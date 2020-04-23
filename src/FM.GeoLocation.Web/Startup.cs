@@ -1,6 +1,5 @@
 using System;
-using FM.GeoLocation.Client;
-using FM.GeoLocation.Web.Configuration;
+using FM.GeoLocation.Client.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -27,10 +26,19 @@ namespace FM.GeoLocation.Web
             services.AddLogging(builder => builder.AddSerilog());
             services.AddSingleton(Log.Logger);
 
-            // Geo Location
-            services.AddSingleton<IGeoLocationClientConfiguration, GeoLocationClientConfiguration>();
-            services.AddSingleton<IGeoLocationClient, GeoLocationClient>();
-            services.AddSingleton<IAddressValidator, AddressValidator>();
+            services.AddGeoLocationClient(options =>
+            {
+                options.BaseUrl = Configuration["GeoLocationService:BaseUrl"];
+                options.ApiKey = Configuration["GeoLocationService:ApiKey"];
+                options.UseMemoryCache = true;
+                options.CacheEntryLifeInMinutes = 60;
+                options.RetryTimespans = new[]
+                {
+                    TimeSpan.FromSeconds(1),
+                    TimeSpan.FromSeconds(3),
+                    TimeSpan.FromSeconds(5)
+                };
+            });
 
             services.AddHttpContextAccessor();
 
