@@ -1,0 +1,101 @@
+parameters:
+- name: environment
+  default: 'dev'
+
+stages:
+- stage: ${{ parameters.environment }}
+
+  variables:
+  - name: 'environment'
+    value: ${{ parameters.environment }}
+
+  jobs:
+  - deployment: terraform_deploy
+
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    environment: 'fm-geolocationweb-${{ parameters.environment }}'
+
+    strategy:
+     runOnce:
+       deploy:
+        steps:
+          - download: current
+            displayName: 'Download terraform source artifact'
+            artifact: terraform
+
+          - task: TerraformInstaller@0
+            displayName: 'Install terraform'
+            inputs:
+              terraformVersion: '$(TerraformVersion)'
+
+          - task: TerraformTaskV1@0
+            displayName: 'Terraform: azurerm init'
+            inputs:
+              workingDirectory: '$(Pipeline.Workspace)/terraform'
+              backendServiceArm: '$(AzSubscription)'
+              backendAzureRmResourceGroupName: '$(AzTerraformResourceGroup)'
+              backendAzureRmStorageAccountName: '$(AzTerraformStorageAccount)'
+              backendAzureRmContainerName: terraform
+              backendAzureRmKey: '${{ parameters.environment }}-terraform.tfstate'
+
+          - task: TerraformTaskV1@0
+            displayName: 'Terraform : azurerm plan'
+            inputs:
+              command: plan
+              workingDirectory: '$(Pipeline.Workspace)/terraform'
+              commandOptions: '-var="environment=$(environment)"'
+              environmentServiceNameAzureRM: '$(AzSubscription)'
+
+          - task: TerraformTaskV1@0
+            name: terraform_validate_and_apply
+            displayName: 'Terraform : azurerm validate and apply'
+            inputs:
+              command: apply
+              workingDirectory: '$(Pipeline.Workspace)/terraform'
+              commandOptions: '-var="environment=$(environment)"'
+              environmentServiceNameAzureRM: '$(AzSubscription)'
+
+          - powershell: |
+              $terraformOutput = Get-Content "$(terraform_validate_and_apply.jsonOutputVariablesPath)" | ConvertFrom-Json
+              $terraformOutput | Get-Member -MemberType NoteProperty | % { $o = $terraformOutput.($_.Name); Write-Host "##vso[task.setvariable variable=$($_.Name);isoutput=true;issecret=$($o.sensitive)]$($o.value)" }
+            name: terraform_output
+            displayName: 'Read terraform output vars'
+
+  - deployment: 'webapp_deploy'
+    dependsOn: 'terraform_deploy'
+    pool: 
+      vmImage: 'windows-latest'
+
+    environment: 'fm-geolocationweb-${{ parameters.environment }}'
+
+    variables:
+    - name: identity_storage_connection
+      value: $[ dependencies.terraform_deploy.outputs['terraform_deploy.terraform_output.identity_storage_connection'] ]
+    - name: appdata_storage_connection
+      value: $[ dependencies.terraform_deploy.outputs['terraform_deploy.terraform_output.appdata_storage_connection'] ]
+
+    strategy:
+     runOnce:
+       deploy:
+         steps:
+          - download: current
+            displayName: 'Download webapp artifact'
+            artifact: webapp
+
+          - task: AzureKeyVault@1
+            inputs:
+              azureSubscription: '$(AzSubscription)'
+              keyVaultName: 'fm-geolocationweb-${{ parameters.environment }}'
+              secretsFilter: '*'
+
+          - task: AzureRmWebAppDeployment@4
+            displayName: 'Azure App Service Deploy: FM-GeoLocation-WebApp-$(environment)'
+            inputs:
+              azureSubscription: '$(AzSubscription)'
+              WebAppName: 'geolocationweb-app-$(environment)'
+              deployToSlotOrASE: true
+              ResourceGroupName: 'fm-geolocationweb-$(environment)'
+              packageForLinux: '$(Pipeline.Workspace)/webapp/FM.GeoLocation.Web.zip'
+              AppSettings: '-GeoLocationService:BaseUrl "$(geolocation-baseurl)" -GeoLocationService:ApiKey "$(geolocation-apikey)"'
