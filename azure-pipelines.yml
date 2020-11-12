@@ -6,6 +6,13 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  TerraformVersion: '0.13.0'
+  AzTerraformRegion: 'uksouth'
+  AzTerraformResourceGroup: 'fm-geolocationweb-terraform'
+  AzTerraformStorageAccount: 'fmgeolocationwebtfstate'
+  AzSubscription: 'Personal-Pay-As-You-Go'
+
 stages:
 - stage: build
   jobs:
@@ -49,3 +56,23 @@ stages:
     - publish: '$(Build.artifactStagingDirectory)/webapp'
       displayName: 'Publish website source artifact'
       artifact: webapp
+
+- stage: terraform_state_backend
+  jobs:
+  - job: create_terraform_backend
+    pool:
+      vmImage: 'windows-latest'
+
+    steps:
+    - checkout: none
+      displayName: 'Skip checking out source'
+
+    - task: AzureCLI@1
+      displayName: 'Create terraform backend in Azure storage'
+      inputs:
+        azureSubscription: '$(AzSubscription)'
+        scriptLocation: inlineScript
+        inlineScript: |
+          call az group create --location "$(AzTerraformRegion)" --name "$(AzTerraformResourceGroup)"
+          call az storage account create --name "$(AzTerraformStorageAccount)" --resource-group "$(AzTerraformResourceGroup)" --location "$(AzTerraformRegion)" --sku "Standard_LRS"
+          call az storage container create --name "terraform" --account-name "$(AzTerraformStorageAccount)"
