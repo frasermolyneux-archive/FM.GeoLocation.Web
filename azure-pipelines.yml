@@ -4,39 +4,48 @@ trigger:
     - '*'
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'ubuntu-latest'
 
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+stages:
+- stage: build
+  jobs:
+  - job: build
+    pool:
+      vmImage: 'windows-latest'
 
-steps:
-- task: NuGetToolInstaller@1
+    variables:
+      solution: '**/*.sln'
+      buildPlatform: 'Any CPU'
+      buildConfiguration: 'Release'
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
-    command: 'restore'
-    feedsToUse: 'config'
-    nugetConfigPath: './src/nuget.config'
+    steps:
+    - task: NuGetToolInstaller@1
 
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: '$(solution)'
+        command: 'restore'
+        feedsToUse: 'config'
+        nugetConfigPath: './src/nuget.config'
 
-- task: CopyFiles@2
-  displayName: "Copy terraform to artifact staging directory"
-  inputs: 
-    SourceFolder: '$(Build.SourcesDirectory)/terraform'
-    Contents: '**'
-    TargetFolder: '$(Build.artifactStagingDirectory)/terraform'
+    - task: VSBuild@1
+      inputs:
+        solution: '$(solution)'
+        msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)/webapp"'
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathToPublish: '$(build.artifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
+    - task: CopyFiles@2
+      displayName: 'Copy terraform folder into staging directory'
+      inputs: 
+        SourceFolder: '$(Build.sourcesDirectory)/terraform'
+        Contents: '**'
+        TargetFolder: '$(Build.artifactStagingDirectory)/terraform'
+
+    - publish: $(Build.artifactStagingDirectory)/terraform
+      displayName: Publish terraform artifact
+      artifact: terraform
+
+    - publish: '$(Build.artifactStagingDirectory)/webapp'
+      displayName: 'Publish website source artifact'
+      artifact: webapp
