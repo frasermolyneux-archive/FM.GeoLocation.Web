@@ -59,7 +59,13 @@ namespace FM.GeoLocation.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving geo-location data for {address}", address);
-                return Error();
+                return RedirectToAction("Error");
+            }
+
+            if (lookupAddressResponse == null)
+            {
+                _logger.LogError("Failed to retrieve geo-location data for {address}", address);
+                return RedirectToAction("Error");
             }
 
             _httpContext.HttpContext.Session.SetObjectAsJson(UserLocationSessionKey, lookupAddressResponse);
@@ -125,7 +131,7 @@ namespace FM.GeoLocation.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving geo-location data for {address}", model.AddressData);
-                return Error();
+                return RedirectToAction("Error");
             }
 
             return View(model);
@@ -191,7 +197,7 @@ namespace FM.GeoLocation.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving geo-location data for {addressData}", model.AddressData);
-                return Error();
+                return RedirectToAction("Error");
             }
 
             return View(model);
@@ -242,7 +248,7 @@ namespace FM.GeoLocation.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error removing geo-location data for {address}", model.AddressData);
-                return Error();
+                return RedirectToAction("Error");
             }
 
             return View(model);
