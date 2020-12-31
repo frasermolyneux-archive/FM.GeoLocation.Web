@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FM.GeoLocation.Client" Version="1.0.4316" />
+    <PackageReference Include="FM.GeoLocation.Client" Version="1.0.4321" />
     <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
   </ItemGroup>
 

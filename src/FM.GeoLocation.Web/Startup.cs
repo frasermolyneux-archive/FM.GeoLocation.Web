@@ -31,6 +31,7 @@ namespace FM.GeoLocation.Web
                 options.BaseUrl = Configuration["GeoLocationService:BaseUrl"];
                 options.ApiKey = Configuration["GeoLocationService:ApiKey"];
                 options.UseMemoryCache = true;
+                options.BubbleExceptions = Configuration.GetValue<bool>("GeoLocationService:BubbleExceptions");
                 options.CacheEntryLifeInMinutes = 60;
                 options.RetryTimespans = new[]
                 {

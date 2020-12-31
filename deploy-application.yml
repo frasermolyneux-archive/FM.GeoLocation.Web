@@ -98,4 +98,4 @@ stages:
               deployToSlotOrASE: true
               ResourceGroupName: 'fm-geolocationweb-$(environment)'
               packageForLinux: '$(Pipeline.Workspace)/webapp/FM.GeoLocation.Web.zip'
-              AppSettings: '-GeoLocationService:BaseUrl "$(geolocation-baseurl)" -GeoLocationService:ApiKey "$(geolocation-apikey)"'
+              AppSettings: '-GeoLocationService:BaseUrl "$(geolocation-baseurl)" -GeoLocationService:ApiKey "$(geolocation-apikey)" -GeoLocationService:BubbleExceptions "false"'
