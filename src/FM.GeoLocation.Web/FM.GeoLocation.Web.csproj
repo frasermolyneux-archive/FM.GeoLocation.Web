@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FM.GeoLocation.Client" Version="1.0.4325" />
+    <PackageReference Include="FM.GeoLocation.Client" Version="1.0.4327" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.10" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.10" />
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="3.1.10" />
