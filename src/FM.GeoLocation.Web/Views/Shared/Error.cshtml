@@ -20,3 +20,11 @@
 <p>
     We will be alerted to persistent errors and will try our best to resolve them quickly.
 </p>
+
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <h3>Detailed Response</h3>
+    <p>
+        @Model.Message
+    </p>
+}

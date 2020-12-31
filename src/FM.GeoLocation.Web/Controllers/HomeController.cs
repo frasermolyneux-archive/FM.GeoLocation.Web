@@ -52,15 +52,20 @@ namespace FM.GeoLocation.Web.Controllers
 
             var lookupAddressResponse = await _geoLocationClient.LookupAddress(address.ToString());
 
-            if (lookupAddressResponse == null || !lookupAddressResponse.Success)
+            if (lookupAddressResponse == null)
             {
-                _logger.LogError("Failed to retrieve geo-location data for {address}", address);
+                return Error();
+            }
+            else if (!lookupAddressResponse.Success)
+            {
+                return Error(lookupAddressResponse.ErrorMessage);
+            }
+            else
+            {
+                _httpContext.HttpContext.Session.SetObjectAsJson(UserLocationSessionKey, lookupAddressResponse);
+
                 return View(lookupAddressResponse);
             }
-
-            _httpContext.HttpContext.Session.SetObjectAsJson(UserLocationSessionKey, lookupAddressResponse);
-
-            return View(lookupAddressResponse);
         }
 
         public IActionResult Privacy()
@@ -69,9 +74,9 @@ namespace FM.GeoLocation.Web.Controllers
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Error(string message = null)
         {
-            return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
+            return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier, Message = message});
         }
 
         [HttpGet]
