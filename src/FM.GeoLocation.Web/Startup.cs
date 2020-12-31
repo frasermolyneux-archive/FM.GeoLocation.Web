@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Serilog;
 
 namespace FM.GeoLocation.Web
 {
@@ -21,10 +20,6 @@ namespace FM.GeoLocation.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-
-            // Serilog
-            services.AddLogging(builder => builder.AddSerilog());
-            services.AddSingleton(Log.Logger);
 
             services.AddGeoLocationClient(options =>
             {

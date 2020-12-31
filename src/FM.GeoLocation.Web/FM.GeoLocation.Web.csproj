@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="FM.GeoLocation.Client" Version="1.0.4321" />
-    <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="3.1.10" />
   </ItemGroup>
 
   <ItemGroup>
