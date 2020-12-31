@@ -50,22 +50,12 @@ namespace FM.GeoLocation.Web.Controllers
 
             var address = GetUsersIpForLookup();
 
-            LookupAddressResponse lookupAddressResponse;
+            var lookupAddressResponse = await _geoLocationClient.LookupAddress(address.ToString());
 
-            try
-            {
-                lookupAddressResponse = await _geoLocationClient.LookupAddress(address.ToString());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving geo-location data for {address}", address);
-                return RedirectToAction("Error");
-            }
-
-            if (lookupAddressResponse == null)
+            if (!lookupAddressResponse.Success)
             {
                 _logger.LogError("Failed to retrieve geo-location data for {address}", address);
-                return RedirectToAction("Error");
+                return View(lookupAddressResponse);
             }
 
             _httpContext.HttpContext.Session.SetObjectAsJson(UserLocationSessionKey, lookupAddressResponse);
@@ -118,20 +108,12 @@ namespace FM.GeoLocation.Web.Controllers
                 return View(model);
             }
 
-            try
-            {
-                model.LookupAddressResponse = await _geoLocationClient.LookupAddress(model.AddressData);
+            model.LookupAddressResponse = await _geoLocationClient.LookupAddress(model.AddressData);
 
-                if (!model.LookupAddressResponse.Success)
-                {
-                    ModelState.AddModelError(nameof(model.AddressData), model.LookupAddressResponse.ErrorMessage);
-                    return View(model);
-                }
-            }
-            catch (Exception ex)
+            if (!model.LookupAddressResponse.Success)
             {
-                _logger.LogError(ex, "Error retrieving geo-location data for {address}", model.AddressData);
-                return RedirectToAction("Error");
+                ModelState.AddModelError(nameof(model.AddressData), model.LookupAddressResponse.ErrorMessage);
+                return View(model);
             }
 
             return View(model);
@@ -184,20 +166,12 @@ namespace FM.GeoLocation.Web.Controllers
                 return View(model);
             }
 
-            try
-            {
-                model.LookupAddressBatchResponse = await _geoLocationClient.LookupAddressBatch(addresses);
+            model.LookupAddressBatchResponse = await _geoLocationClient.LookupAddressBatch(addresses);
 
-                if (!model.LookupAddressBatchResponse.Success)
-                {
-                    ModelState.AddModelError(nameof(model.AddressData), model.LookupAddressBatchResponse.ErrorMessage);
-                    return View(model);
-                }
-            }
-            catch (Exception ex)
+            if (!model.LookupAddressBatchResponse.Success)
             {
-                _logger.LogError(ex, "Error retrieving geo-location data for {addressData}", model.AddressData);
-                return RedirectToAction("Error");
+                ModelState.AddModelError(nameof(model.AddressData), model.LookupAddressBatchResponse.ErrorMessage);
+                return View(model);
             }
 
             return View(model);
@@ -233,23 +207,15 @@ namespace FM.GeoLocation.Web.Controllers
                 return View(model);
             }
 
-            try
-            {
-                var removeDataForAddressResponse = await _geoLocationClient.RemoveDataForAddress(model.AddressData);
+            var removeDataForAddressResponse = await _geoLocationClient.RemoveDataForAddress(model.AddressData);
 
-                if (!removeDataForAddressResponse.Success)
-                {
-                    ModelState.AddModelError(nameof(model.AddressData), removeDataForAddressResponse.ErrorMessage);
-                    return View(model);
-                }
-
-                model.RemoveDataForAddressResponse = removeDataForAddressResponse;
-            }
-            catch (Exception ex)
+            if (!removeDataForAddressResponse.Success)
             {
-                _logger.LogError(ex, "Error removing geo-location data for {address}", model.AddressData);
-                return RedirectToAction("Error");
+                ModelState.AddModelError(nameof(model.AddressData), removeDataForAddressResponse.ErrorMessage);
+                return View(model);
             }
+
+            model.RemoveDataForAddressResponse = removeDataForAddressResponse;
 
             return View(model);
         }
@@ -259,7 +225,7 @@ namespace FM.GeoLocation.Web.Controllers
             const string cfConnectingIpKey = "CF-Connecting-IP";
             const string xForwardedForHeaderKey = "X-Forwarded-For";
 
-            if (_environment.IsDevelopment()) return IPAddress.Parse("162.25.25.25");
+            if (_environment.IsDevelopment()) return IPAddress.Parse("8.8.8.8");
 
             IPAddress address = null;
 
