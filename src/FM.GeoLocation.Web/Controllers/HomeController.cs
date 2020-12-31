@@ -52,7 +52,7 @@ namespace FM.GeoLocation.Web.Controllers
 
             var lookupAddressResponse = await _geoLocationClient.LookupAddress(address.ToString());
 
-            if (!lookupAddressResponse.Success)
+            if (lookupAddressResponse == null || !lookupAddressResponse.Success)
             {
                 _logger.LogError("Failed to retrieve geo-location data for {address}", address);
                 return View(lookupAddressResponse);
