@@ -2,9 +2,15 @@
 
 A web front-end that exposes the FM.GeoLocation functionality.
 
+* [Documentation](docs/index.md)
+
+---
+
 ## Build Status
 
 [![Build Status](https://dev.azure.com/frasermolyneux/Personal/_apis/build/status/frasermolyneux.FM.GeoLocation?branchName=master&stageName=iris)](https://dev.azure.com/frasermolyneux/Personal/_build/latest?definitionId=99&branchName=master)
+
+---
 
 ## Deployment Status
 
