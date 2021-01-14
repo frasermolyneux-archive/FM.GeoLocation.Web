@@ -35,7 +35,7 @@
                 <tr>
                     <td>IP Address</td>
                     <td>
-                        <img src="~/images/flags/@(Model.GeoLocationDto?.CountryCode.ToLower()).png" /> @Model.GeoLocationDto?.TranslatedAddress
+                        <img src="~/images/flags/@(Model.GeoLocationDto?.CountryCode?.ToLower()).png" /> @Model.GeoLocationDto?.TranslatedAddress
                     </td>
                 </tr>
                 @if (Model.GeoLocationDto?.PostalCode != null)
