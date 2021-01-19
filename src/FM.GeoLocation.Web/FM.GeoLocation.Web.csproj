@@ -7,9 +7,9 @@
 
   <ItemGroup>
     <PackageReference Include="FM.GeoLocation.Client" Version="1.0.4389" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.10" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.10" />
-    <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="3.1.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="5.0.2" />
   </ItemGroup>
 
   <ItemGroup>
