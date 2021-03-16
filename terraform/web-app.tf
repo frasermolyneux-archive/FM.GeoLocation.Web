@@ -3,8 +3,8 @@ resource "azurerm_app_service_plan" "app-service-plan" {
     resource_group_name = azurerm_resource_group.resource-group.name
     location = azurerm_resource_group.resource-group.location
     sku {
-      tier = "Basic"
-      size = "B1"
+      tier = "Shared"
+      size = "D1"
     }
 }
 
@@ -16,5 +16,6 @@ resource "azurerm_app_service" "app-service" {
 
   site_config {
     dotnet_framework_version  = "v5.0"
+    use_32_bit_worker_process = true
   }
 }
