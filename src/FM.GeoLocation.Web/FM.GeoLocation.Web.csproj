@@ -6,10 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FM.GeoLocation.Client" Version="1.0.4467" />
+    <PackageReference Include="FM.GeoLocation.Client" Version="1.0.4520" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="5.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="5.0.5" />
   </ItemGroup>
 
   <ItemGroup>
