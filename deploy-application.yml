@@ -71,10 +71,8 @@ stages:
     environment: 'fm-geolocationweb-${{ parameters.environment }}'
 
     variables:
-    - name: identity_storage_connection
-      value: $[ dependencies.terraform_deploy.outputs['terraform_deploy.terraform_output.identity_storage_connection'] ]
-    - name: appdata_storage_connection
-      value: $[ dependencies.terraform_deploy.outputs['terraform_deploy.terraform_output.appdata_storage_connection'] ]
+    - name: appinsights_instrumentation_key
+      value: $[ dependencies.terraform_deploy.outputs['terraform_deploy.terraform_output.instrumentation_key'] ]
 
     strategy:
      runOnce:
@@ -98,4 +96,4 @@ stages:
               deployToSlotOrASE: true
               ResourceGroupName: 'fm-geolocationweb-$(environment)'
               packageForLinux: '$(Pipeline.Workspace)/webapp/FM.GeoLocation.Web.zip'
-              AppSettings: '-GeoLocationService:BaseUrl "$(geolocation-baseurl)" -GeoLocationService:ApiKey "$(geolocation-apikey)" -GeoLocationService:BubbleExceptions "false"'
+              AppSettings: '-ApplicationInsights:InstrumentationKey "$(appinsights_instrumentation_key)" -GeoLocationService:BaseUrl "$(geolocation-baseurl)" -GeoLocationService:ApiKey "$(geolocation-apikey)" -GeoLocationService:BubbleExceptions "false"'

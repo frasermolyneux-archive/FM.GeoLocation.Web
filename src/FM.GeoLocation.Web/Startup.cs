@@ -19,6 +19,8 @@ namespace FM.GeoLocation.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddApplicationInsightsTelemetry();
+
             services.AddControllersWithViews();
 
             services.AddGeoLocationClient(options =>
