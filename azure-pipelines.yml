@@ -61,6 +61,14 @@ stages:
       inputs:
         command: 'publish'
         projects: '**/*.csproj'
+        arguments: '--configuration $(buildConfiguration)'
+
+    - task: CopyFiles@2
+      displayName: 'Copy web app into artifact staging'
+      inputs: 
+        SourceFolder: '$(Build.sourcesDirectory)/src/FM.GeoLocation.Web/bin/$(buildConfiguration)/net6.0'
+        Contents: '**'
+        TargetFolder: '$(Build.artifactStagingDirectory)/webapp'
 
     - task: CopyFiles@2
       displayName: 'Copy terraform folder into staging directory'
