@@ -30,7 +30,7 @@ stages:
             inputs:
               terraformVersion: '$(TerraformVersion)'
 
-          - task: TerraformTaskV1@0
+          - task: TerraformTaskV2@2
             displayName: 'Terraform: azurerm init'
             inputs:
               workingDirectory: '$(Pipeline.Workspace)/terraform'
@@ -40,7 +40,7 @@ stages:
               backendAzureRmContainerName: terraform
               backendAzureRmKey: '${{ parameters.environment }}-terraform.tfstate'
 
-          - task: TerraformTaskV1@0
+          - task: TerraformTaskV2@2
             displayName: 'Terraform : azurerm plan'
             inputs:
               command: plan
@@ -48,7 +48,7 @@ stages:
               commandOptions: '-var="environment=$(environment)"'
               environmentServiceNameAzureRM: '$(AzSubscription)'
 
-          - task: TerraformTaskV1@0
+          - task: TerraformTaskV2@2
             name: terraform_validate_and_apply
             displayName: 'Terraform : azurerm validate and apply'
             inputs:
