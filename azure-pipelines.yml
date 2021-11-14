@@ -14,7 +14,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  TerraformVersion: '0.14.8'
+  TerraformVersion: '1.0.11'
   AzTerraformRegion: 'uksouth'
   AzTerraformResourceGroup: 'fm-geolocationweb-terraform'
   AzTerraformStorageAccount: 'fmgeolocationwebtfstate'
@@ -37,21 +37,30 @@ stages:
       buildConfiguration: 'Release'
 
     steps:
-    - task: NuGetToolInstaller@1
-
-    - task: NuGetCommand@2
+    - task: UseDotNet@2
       inputs:
-        restoreSolution: '$(solution)'
+        version: 6.0.x
+        performMultiLevelLookup: true
+        includePreviewVersions: true
+    
+    - task: DotNetCoreCLI@2
+      inputs:
         command: 'restore'
+        projects: '**/*.csproj'
         feedsToUse: 'config'
         nugetConfigPath: './src/nuget.config'
 
-    - task: VSBuild@1
+    - task: DotNetCoreCLI@2
       inputs:
-        solution: '$(solution)'
-        msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)/webapp"'
-        platform: '$(buildPlatform)'
-        configuration: '$(buildConfiguration)'
+        command: 'build'
+        projects: '**/*.csproj'
+        arguments: '--configuration $(buildConfiguration)'
+      displayName: 'dotnet build $(buildConfiguration)'
+
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'publish'
+        projects: '**/*.csproj'
 
     - task: CopyFiles@2
       displayName: 'Copy terraform folder into staging directory'
